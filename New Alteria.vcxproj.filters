@@ -27,6 +27,9 @@
     <ClCompile Include="src\lib\stb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\start.h">
@@ -35,5 +38,12 @@
     <ClInclude Include="src\lib\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\fragment_core.glsl" />
+    <None Include="assets\vertex_core.glsl" />
   </ItemGroup>
 </Project>

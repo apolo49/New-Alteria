@@ -150,14 +150,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\lib\glad.c" />
     <ClCompile Include="src\lib\stb.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\start.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\lib\stb_image.h" />
     <ClInclude Include="src\start.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\fragment_core.glsl" />
+    <None Include="assets\vertex_core.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
