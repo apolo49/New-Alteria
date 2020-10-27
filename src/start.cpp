@@ -1,6 +1,13 @@
 #pragma once
 #include "start.h"
 
+Camera Camera::defaultCamera(glm::vec3(0.0f, 0.0f, 3.0f));
+double deltaTime = 0.0f; // tme btwn frames
+double lastFrame = 0.0f; // time of last frame
+
+Screen screen;
+float mixVal;
+
 int Start::main()
 {
 	glfwInit();
@@ -11,14 +18,11 @@ int Start::main()
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Alteria", NULL, NULL);
-	if (window == NULL)
-	{
-		std::cout << "Failed to create window" << std::endl;
+	if (!screen.init()) {
+		std::cout << "Could not open window" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
-	glfwMakeContextCurrent(window);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -27,76 +31,95 @@ int Start::main()
 		return -1;
 	}
 
-	glViewport(0, 0, 800, 600);
+	screen.setParameters();
+	Shader shader("assets/object.vert", "assets/object.frag");
 
-	glfwSetFramebufferSizeCallback(window, frameBuffer_SizeCallback);
+	if (mainLoop(shader)) {
+		glfwTerminate();
+		return -1;
+	}
 
-	if (mainLoop(window, Shader("assets/vertex_core.glsl", "assets/fragment_core.glsl"), LoadVAO()))
-		return 1;
-
+	glfwTerminate();
 	return 0;
 }
 
-int Start::mainLoop(GLFWwindow* window, Shader shader, unsigned int VAO) {
-	glm::mat4 trans = glm::mat4(1.0);
-	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
+int Start::mainLoop(Shader shader) {
+	//glm::mat4 trans = glm::mat4(1.0);
+	Cube cube(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.75f));
+	cube.init();
+	while (!screen.shouldClose()) {
+		double currentTime = glfwGetTime();
+		deltaTime = currentTime - lastFrame;
+		lastFrame = currentTime;
+
+		processInput(deltaTime);
 
 		//render
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		trans = glm::rotate(trans, glm::radians(((float)glfwGetTime() / 100)), glm::vec3(1.0f, 1.0f, 1.0f));
+		screen.update();
+
 		//draw shapes
-		glBindVertexArray(VAO);
 		shader.activate();
-		shader.setMat4("transform", trans);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		shader.setFloat("mixVal", mixVal);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		//Create transformation matrix
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 projection = glm::mat4(1.0f);
+		view = Camera::defaultCamera.getViewMatrix();
+		projection = glm::perspective(
+			glm::radians(Camera::defaultCamera.zoom),
+			(float)Screen::SCR_WIDTH / (float)Screen::SCR_HEIGHT, 0.1f, 100.0f);
+
+		shader.setMat4("view", view);
+		shader.setMat4("projection", projection);
+
+		cube.render(shader);
 
 		//send new frame
-		glfwSwapBuffers(window);
+		screen.newFrame();
 		glfwPollEvents();
 	}
 	return 0;
 }
 
-void Start::processInput(GLFWwindow* window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-}
+void Start::processInput(double deltaTime) {
+	if (Keyboard::key(KEY_ESC)) {
+		screen.setShouldClose(true);
+	}
 
-unsigned int Start::LoadVAO() {
-	float vertices[] = {
-		0.5f, 0.5f, 0.0f, //top right
-		-0.5f, 0.5f, 0.0f, //top left
-		-0.5f, -0.5f, 0.0f, //bottom left
-		0.5f, -0.5f, 0.0f //bottom right
-	};
+	// change mix value
+	if (Keyboard::key(KEY_UP)) {
+		mixVal += .05f;
+		if (mixVal > 1) {
+			mixVal = 1.0f;
+		}
+	}
+	if (Keyboard::key(KEY_DOWN)) {
+		mixVal -= .05f;
+		if (mixVal < 0) {
+			mixVal = 0.0f;
+		}
+	}
 
-	int indices[]{
-		0,1,2,
-		2,3,0
-	};
-
-	//VAO,VBO
-	unsigned int VAO, VBO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	//bind VAO
-	glBindVertexArray(VAO);
-
-	//bind VBO
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	//set attrib pointer
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	//Bind EBO
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	return VAO;
+	// move camera
+	if (Keyboard::key(KEY_W)) {
+		Camera::defaultCamera.updateCameraPos(CameraDirection::FORWARD, deltaTime);
+	}
+	if (Keyboard::key(KEY_S)) {
+		Camera::defaultCamera.updateCameraPos(CameraDirection::BACKWARD, deltaTime);
+	}
+	if (Keyboard::key(KEY_D)) {
+		Camera::defaultCamera.updateCameraPos(CameraDirection::RIGHT, deltaTime);
+	}
+	if (Keyboard::key(KEY_A)) {
+		Camera::defaultCamera.updateCameraPos(CameraDirection::LEFT, deltaTime);
+	}
+	if (Keyboard::key(KEY_SPACE)) {
+		Camera::defaultCamera.updateCameraPos(CameraDirection::UP, deltaTime);
+	}
+	if (Keyboard::key(KEY_LSHIFT) || Keyboard::key(KEY_RSHIFT)) {
+		Camera::defaultCamera.updateCameraPos(CameraDirection::DOWN, deltaTime);
+	}
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -150,20 +150,41 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\shader.cpp" />
+    <ClCompile Include="src\graphics\material.cpp" />
+    <ClCompile Include="src\graphics\Mesh.cpp" />
+    <ClCompile Include="src\graphics\Model.cpp" />
+    <ClCompile Include="src\graphics\models\Lamp.hpp" />
+    <ClCompile Include="src\graphics\Texture.cpp" />
+    <ClCompile Include="src\io\Camera.cpp" />
+    <ClCompile Include="src\io\screen.cpp" />
+    <ClCompile Include="src\io\mouse.cpp" />
+    <ClCompile Include="src\io\Keyboard.cpp" />
+    <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\lib\glad.c" />
     <ClCompile Include="src\lib\stb.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\start.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\shader.h" />
+    <ClInclude Include="src\graphics\material.h" />
+    <ClInclude Include="src\graphics\Mesh.h" />
+    <ClInclude Include="src\graphics\Model.h" />
+    <ClInclude Include="src\graphics\models\Cube.hpp" />
+    <ClInclude Include="src\graphics\Texture.h" />
+    <ClInclude Include="src\io\Camera.h" />
+    <ClInclude Include="src\io\screen.h" />
+    <ClInclude Include="src\io\mouse.h" />
+    <ClInclude Include="src\io\Keyboard.h" />
+    <ClInclude Include="src\graphics\shader.h" />
     <ClInclude Include="src\lib\stb_image.h" />
     <ClInclude Include="src\start.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\fragment_core.glsl" />
-    <None Include="assets\vertex_core.glsl" />
+    <None Include="assets\object.frag" />
+    <None Include="assets\object.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\grass.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
